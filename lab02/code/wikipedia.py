@@ -1,5 +1,6 @@
 from collections import defaultdict
 import csv
+from collections import deque
 
 
 class Wikigraph:
@@ -34,6 +35,34 @@ class Wikigraph:
 def length_of_shortest_path(start_page: str, end_page: str, wikigraph: Wikigraph):
     start_id = wikigraph.get_id(start_page)
     end_id = wikigraph.get_id(end_page)
-    
-    # TODO: Question 6
+
+    q = deque([start_id])
+    seen = [start_id]
+
+    parent = {start_id: None}
+    while q:
+        v = q.pop()
+        # check if we are done
+        if v == end_id:
+            steps = []
+            while v:
+                steps.append(v)
+                v = parent[v]
+
+            # Visualize the resulting path
+            for i, s in enumerate(steps[::-1]):
+                print(f"Step {i}:")
+                print(graph.get_name(s))
+            return len(steps)
+        for w in wikigraph.get_links(v):
+            if w in seen:
+                continue
+            seen.append(w)
+            q.appendleft(w)
+            parent[w] = v
+
     return 0
+
+
+graph = Wikigraph()
+length_of_shortest_path("Out of memory", "Solar power in Germany", graph)
