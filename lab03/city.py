@@ -28,7 +28,9 @@ class TouristState:
 
 
 initial_state = TouristState(1, "A")
-stun_states = set([TouristState(2, "A"), TouristState(2, "C"), TouristState(4, "B")])
+stun_states = set(
+    [TouristState(2, "A"), TouristState(2, "C"), TouristState(4, "B")]
+)
 bad_restaurants = [
     ((2, "A"), (3, "A")),
     ((1, "B"), (1, "C")),
@@ -97,10 +99,30 @@ def or_search(state, path: List):
 
 
 def and_search(states, path: List):
-    # TODO: 
-    # In case of success: Return a dictionary of plans, associating to each child state a plan reaching the end
-    # Otherwise: return None
     plans = {}
+
+    # Iterate over all possible states. We execute the OR search for each
+    # state. If one state in `states` is invalid we return `None` and therefore
+    # invalidate the AND node.
+    for state in states:
+        # Now execute the OR search for every child
+        result = or_search(state, path)
+
+        # If this child is not a dead end, add the action with its plan to our
+        # dictionary.
+        if result is not None:
+            plans[state] = result
+
+            # We are not allowed to already return here as neighbor nodes may
+            # not be valid and have not been checked yet. Therefore return at
+            # the end of the function.
+            # return plans
+
+        # Otherwise return `None`. This also correctly invalidates possible
+        # solutions since every child of an AND node has to be a valid solution.
+        else:
+            return None
+
     return plans
 
 
@@ -122,7 +144,13 @@ def print_plan(plan, depth=0):
         else:
             for i, s in enumerate(a.keys()):
                 pref = "el" if i > 0 else ""
-                print(2 * depth * " " + pref + "if state == " + str(s.as_tuple()) + ":")
+                print(
+                    2 * depth * " "
+                    + pref
+                    + "if state == "
+                    + str(s.as_tuple())
+                    + ":"
+                )
                 print_plan(a[s], depth=depth + 1)
 
 
